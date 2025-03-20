@@ -18,27 +18,26 @@ GREEN = (0, 255, 0)
 BROWN = (165, 42, 42)
 
 # Function to visualize the level
-def draw_level(screen, level_data, state):
-    """Draws the Sokoban level in Pygame."""
-    screen.fill(WHITE)
+def draw_level(screen, state, level_data, wall_img, box_img, goal_img, player_img):
+    screen.fill((255, 255, 255))  # Clear the screen
 
-    # Draw walls from level_data
+    # Draw walls
     for x, y in level_data.walls:
-        pygame.draw.rect(screen, BLACK, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        screen.blit(wall_img, (x * TILE_SIZE, y * TILE_SIZE))
 
-    # Draw goal positions from level_data
+    # Draw goals
     for x, y in level_data.goals:
-        pygame.draw.rect(screen, BLUE, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        screen.blit(goal_img, (x * TILE_SIZE, y * TILE_SIZE))
 
-    # Draw boxes from the current state
+    # Draw boxes
     for x, y in state.box_positions:
-        pygame.draw.rect(screen, BROWN, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        screen.blit(box_img, (x * TILE_SIZE, y * TILE_SIZE))
 
     # Draw player
     px, py = state.player_pos
-    pygame.draw.circle(screen, GREEN, (px * TILE_SIZE + TILE_SIZE // 2, py * TILE_SIZE + TILE_SIZE // 2), TILE_SIZE // 2)
+    screen.blit(player_img, (px * TILE_SIZE, py * TILE_SIZE))
 
-    pygame.display.flip()
+    pygame.display.flip()  # Update screen
 
 # Game loop
 def run_game():
@@ -46,6 +45,18 @@ def run_game():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Sokoban - BFS Solver")
     clock = pygame.time.Clock()
+
+    wall_img = pygame.image.load("assets/wall.png")
+    wall_img = pygame.transform.scale(wall_img, (TILE_SIZE, TILE_SIZE))
+
+    box_img = pygame.image.load("assets/box.png")
+    box_img = pygame.transform.scale(box_img, (TILE_SIZE, TILE_SIZE))
+
+    goal_img = pygame.image.load("assets/goal.png")
+    goal_img = pygame.transform.scale(goal_img, (TILE_SIZE, TILE_SIZE))
+
+    player_img = pygame.image.load("assets/player.png")
+    player_img = pygame.transform.scale(player_img, (TILE_SIZE, TILE_SIZE))
 
     # Load the level and initial state
     level_data, initial_state = load_sokoban_map("maps/level1.txt")
@@ -75,7 +86,7 @@ def run_game():
         if step < len(solution):
             action = solution[step]
             current_state = apply_move(current_state, action, level_data)  # Pass level_data
-            draw_level(screen, level_data, current_state)
+            draw_level(screen, current_state, level_data, wall_img, box_img, goal_img, player_img)
             pygame.time.delay(500)  # Delay for visualization
             step += 1
         else:
