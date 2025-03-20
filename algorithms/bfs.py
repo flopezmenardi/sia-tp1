@@ -1,13 +1,13 @@
 from collections import deque
 
-def bfs_search(initial_state, goal_test, actions_fn):
+def bfs_search(initial_state, goal_test, actions_fn, level_data):
     """
     :param initial_state: The starting state
     :param goal_test: A function goal_test(state) -> bool
     :param actions_fn: A function actions_fn(state) -> list of (action, next_state)
     :return: list of actions from initial_state to goal, or None if no solution
     """
-    from nodes.bfs_node import BFSNode  # Assuming BFSNode is defined in its own file
+    from nodes.bfs_node import BFSNode
 
     root_node = BFSNode(state=initial_state, parent=None, action=None, depth=0)
     
@@ -21,7 +21,7 @@ def bfs_search(initial_state, goal_test, actions_fn):
         current_node = frontier.popleft()
 
         # Expand children
-        for action, next_state in actions_fn(current_node.state):
+        for action, next_state in actions_fn(current_node.state, level_data):
             if next_state not in visited:
                 visited.add(next_state)
                 child_node = BFSNode(

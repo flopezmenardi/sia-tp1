@@ -1,8 +1,8 @@
 # nodes/bfs_node.py
 
-from .base_node import BaseNode
+from .base_node import Node
 
-class BFSNode(BaseNode):
+class BFSNode(Node):
     """
     BFS can track the 'depth' of a node if you want
     to know which 'level' you're on in the search tree.
