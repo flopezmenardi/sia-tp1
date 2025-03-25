@@ -18,3 +18,6 @@ class AStarNode(GreedyNode):
         return (f"AStarNode(state={self.state}, g={self.cost_so_far}, "
                 f"heuristics={self.heuristics}, composed_h={self.composed_heuristic}, "
                 f"f={self.f}, action={self.action})")
+    
+    def __lt__(self, other):
+        return self.f < other.f  #comparison based on f-value (cost + heuristic)

@@ -102,7 +102,9 @@ def run_game(config_path="config.json"):
 
     # Run selected algorithm
     if heuristic:
-        solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristic)
+        # Ensure heuristic is always a list, even if only one is selected
+        heuristics = heuristic if isinstance(heuristic, list) else [heuristic]
+        solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics)
     else:
         solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data)
 
