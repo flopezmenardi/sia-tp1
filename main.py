@@ -39,7 +39,7 @@ def select_algorithm(name):
 def select_heuristic(name):
     heuristics = {
         "manhattan": manhattan_heuristic,
-        "deadlocks": deadlock_heuristic,
+        "deadlock": deadlock_heuristic,
         "hungarian": hungarian_heuristic
     }
     return heuristics.get(name.lower())
@@ -85,11 +85,30 @@ def run_game(config_path="config.json"):
 
     # Load configuration
     config = load_config(config_path)
-    level_number = config.get("level", 1)  #default to level 1 if not provided
+    level_number = config.get("level", 1)  # default to level 1 if not provided
     level_file = f"maps/level{level_number}.txt"
-    algorithm_name = config.get("algorithm", "bfs") #default to BFS if not provided
-    heuristic_name = config.get("heuristic", None)
+    algorithm_name = config.get("algorithm", "bfs")  # default to BFS if not provided
 
+    # Determine which heuristics to use
+    heuristics = None
+    if "heuristics" in config:
+        # If a list of heuristics is provided, map each name to its function.
+        heuristics = []
+        for hname in config["heuristics"]:
+            hf = select_heuristic(hname)
+            if hf is not None:
+                heuristics.append(hf)
+            else:
+                print(f"Warning: Unknown heuristic '{hname}'")
+        if not heuristics:
+            heuristics = None
+    elif "heuristic" in config:
+        # Fall back to a single heuristic if only one is provided.
+        hname = config.get("heuristic")
+        hf = select_heuristic(hname)
+        if hf is not None:
+            heuristics = [hf]
+    
     # Load level
     level_data, initial_state = load_sokoban_map(level_file)
 
@@ -99,13 +118,8 @@ def run_game(config_path="config.json"):
         print(f"Error: Unknown algorithm '{algorithm_name}'")
         return
 
-    # Select heuristic (if applicable)
-    heuristic = select_heuristic(heuristic_name) if heuristic_name else None
-
     # Run selected algorithm
-    if heuristic:
-        # Ensure heuristic is always a list, even if only one is selected
-        heuristics = heuristic if isinstance(heuristic, list) else [heuristic]
+    if heuristics:
         solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics)
     else:
         solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data)
