@@ -1,6 +1,9 @@
 import heapq
 
-def a_star_search(initial_state, goal_test, actions_fn, cost_fn, heuristic_fn):
+def cost_fn(state, action):
+    return 1  #uniform cost for every move
+
+def a_star_search(initial_state, goal_test, actions_fn, level_data, heuristic_fn):
     """
     :param initial_state: The starting state
     :param goal_test: goal_test(state) -> bool
@@ -17,7 +20,7 @@ def a_star_search(initial_state, goal_test, actions_fn, cost_fn, heuristic_fn):
         parent=None,
         action=None,
         cost_so_far=0.0,
-        heuristic=heuristic_fn(initial_state)
+        heuristics=heuristic_fn(initial_state, level_data)
     )
     
     if goal_test(root_node.state):

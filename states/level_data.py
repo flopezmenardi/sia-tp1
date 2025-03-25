@@ -40,9 +40,10 @@ class LevelData:
         """
         deadlocks = set()
 
-        for x, y in product(range(self.width), range(self.height)):
-            if self.is_wall(x, y) or self.is_goal(x, y):
-                continue  #ignore walls and goals
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.is_wall(x, y) or self.is_goal(x, y):
+                    continue  #ignore walls and goals
 
             ####### CASE 1: Corner Deadlocks #######
             if ((self.is_wall(x - 1, y) and self.is_wall(x, y - 1)) or
@@ -73,9 +74,13 @@ class LevelData:
         This speeds up heuristic calculations.
         """
         distances = {}
-        all_positions = product(range(self.width), range(self.height))
 
-        for (x1, y1), (x2, y2) in product(all_positions, repeat=2):
-            distances[((x1, y1), (x2, y2))] = abs(x1 - x2) + abs(y1 - y2)
+        # Generate all positions explicitly
+        all_positions = [(x, y) for x in range(self.width) for y in range(self.height)]
+
+        # Nested loops instead of product(all_positions, repeat=2)
+        for x1, y1 in all_positions:
+            for x2, y2 in all_positions:
+                distances[((x1, y1), (x2, y2))] = abs(x1 - x2) + abs(y1 - y2)
 
         return distances

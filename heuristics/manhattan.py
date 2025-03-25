@@ -1,4 +1,4 @@
-def heuristic(state, level_data):
+def manhattan_heuristic(state, level_data):
     """
     A* heuristic function for Sokoban
 

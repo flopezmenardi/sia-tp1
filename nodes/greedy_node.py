@@ -1,4 +1,4 @@
-from .base_node import BaseNode
+from .base_node import Node
 
 def default_composition(heuristics):
     """
@@ -7,7 +7,7 @@ def default_composition(heuristics):
     """
     return sum(heuristics)
 
-class GreedyNode(BaseNode):
+class GreedyNode(Node):
     """
     Nodo para búsqueda Greedy que ahora acepta múltiples heurísticas.
     
