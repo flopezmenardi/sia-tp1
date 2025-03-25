@@ -1,31 +1,26 @@
 import pygame
 import sys
 import json
+
+# Example placeholders for BFS, DFS, etc. 
+# (Replace with your actual imports if needed)
 from algorithms.bfs import bfs_search
 from algorithms.dfs import dfs_search
 from algorithms.greedy import greedy_search
 from algorithms.astar import a_star_search
+
 from loaders.map_loader import load_sokoban_map
-from states.level_data import LevelData
-from states.sokoban_state import State, apply_move, get_possible_moves
+from states.sokoban_state import apply_move, get_possible_moves
 from heuristics.manhattan import manhattan_heuristic
 from heuristics.deadlock import deadlock_heuristic
 from heuristics.hungarian import hungarian_heuristic
 
-# Pygame setup
-TILE_SIZE = 40  
-WIDTH, HEIGHT = 800, 600  
+# Height (in pixels) reserved at the top for stats
+STATS_BAR_HEIGHT = 60  
 FPS = 60
-
-# White color for screen
 WHITE = (255, 255, 255)
+BROWN = (164, 116, 73)
 
-# Load configuration from JSON
-def load_config(config_file):
-    with open(config_file, "r") as file:
-        return json.load(file)
-
-# Select the search algorithm dynamically
 def select_algorithm(name):
     algorithms = {
         "bfs": bfs_search,
@@ -35,7 +30,6 @@ def select_algorithm(name):
     }
     return algorithms.get(name.lower())
 
-# Select heuristic function dynamically (if needed)
 def select_heuristic(name):
     heuristics = {
         "manhattan": manhattan_heuristic,
@@ -44,81 +38,130 @@ def select_heuristic(name):
     }
     return heuristics.get(name.lower())
 
-# Function to visualize the level
-def draw_level(screen, state, level_data, wall_img, box_img, goal_img, player_img):
-    screen.fill(WHITE)  # Clear screen
+def load_config(config_file):
+    with open(config_file, "r") as file:
+        return json.load(file)
+
+def draw_stats(screen, font, line1_text, line2_text):
+    """
+    Draws two lines of stats at the top of the screen.
+    line1_text, line2_text are strings to display.
+    """
+    # Clear the top bar (optional: fill a rectangle)
+    pygame.draw.rect(screen, BROWN, (0, 0, screen.get_width(), STATS_BAR_HEIGHT))
+
+    text_surface1 = font.render(line1_text, True, (0, 0, 0))
+    text_surface2 = font.render(line2_text, True, (0, 0, 0))
+    screen.blit(text_surface1, (10, 10))  # First line
+    screen.blit(text_surface2, (10, 30))  # Second line
+
+def draw_level(screen, state, level_data, images, tile_size, font, moves, pushes, algo_name, heur_names):
+    """
+    Draw the level below the stats bar. 
+    Also draws the two lines of stats at the top.
+    """
+    # Fill entire screen
+    screen.fill(WHITE)
+
+    # Prepare stats lines
+    boxes_on_goals = sum(1 for b in state.box_positions if b in level_data.goals)
+    total_goals = len(level_data.goals)
+    line1 = f"Moves: {moves}  Pushes: {pushes}  Boxes: {boxes_on_goals}/{total_goals}"
+    if heur_names:
+        heur_text = ", ".join(h.upper() for h in heur_names)
+    else:
+        heur_text = "None"
+    line2 = f"Algorithm: {algo_name.upper()}  |  Heuristics: {heur_text}"
+
+    # Draw the two lines at top
+    draw_stats(screen, font, line1, line2)
+
+    # Now draw the map offset by STATS_BAR_HEIGHT
+    offset_y = STATS_BAR_HEIGHT
 
     # Draw walls
     for x, y in level_data.walls:
-        screen.blit(wall_img, (x * TILE_SIZE, y * TILE_SIZE))
+        screen.blit(images["wall"], (x * tile_size, y * tile_size + offset_y))
 
     # Draw goals
     for x, y in level_data.goals:
-        screen.blit(goal_img, (x * TILE_SIZE, y * TILE_SIZE))
+        screen.blit(images["goal"], (x * tile_size, y * tile_size + offset_y))
 
     # Draw boxes
     for x, y in state.box_positions:
-        screen.blit(box_img, (x * TILE_SIZE, y * TILE_SIZE))
+        screen.blit(images["box"], (x * tile_size, y * tile_size + offset_y))
 
     # Draw player
     px, py = state.player_pos
-    screen.blit(player_img, (px * TILE_SIZE, py * TILE_SIZE))
+    screen.blit(images["player"], (px * tile_size, py * tile_size + offset_y))
 
-    pygame.display.flip()  # Update screen
+    pygame.display.update()
 
-# Game loop
-def run_game(config_path="config.json"):
+def run_game(config_path):
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Sokoban Solver")
-    clock = pygame.time.Clock()
-
-    # Load assets
-    wall_img = pygame.image.load("assets/wall.png").convert_alpha()
-    wall_img = pygame.transform.scale(wall_img, (TILE_SIZE, TILE_SIZE))
-    box_img = pygame.image.load("assets/box.png").convert_alpha()
-    box_img = pygame.transform.scale(box_img, (TILE_SIZE, TILE_SIZE))
-    goal_img = pygame.image.load("assets/goal.png").convert_alpha()
-    goal_img = pygame.transform.scale(goal_img, (TILE_SIZE, TILE_SIZE))
-    player_img = pygame.image.load("assets/player.png").convert_alpha()
-    player_img = pygame.transform.scale(player_img, (TILE_SIZE, TILE_SIZE))
-
-    # Load configuration
+    pygame.font.init()
     config = load_config(config_path)
-    level_number = config.get("level", 1)  # default to level 1 if not provided
+
+    # Basic config
+    level_number = config.get("level", 1)
     level_file = f"maps/level{level_number}.txt"
-    algorithm_name = config.get("algorithm", "bfs")  # default to BFS if not provided
+    algo_name = config.get("algorithm", "bfs")
 
-    # Determine which heuristics to use
-    heuristics = None
+    # Determine heuristics
+    heuristics = []
+    heur_names = []
     if "heuristics" in config:
-        # If a list of heuristics is provided, map each name to its function.
-        heuristics = []
-        for hname in config["heuristics"]:
-            hf = select_heuristic(hname)
-            if hf is not None:
+        for h in config["heuristics"]:
+            hf = select_heuristic(h)
+            if hf:
                 heuristics.append(hf)
-            else:
-                print(f"Warning: Unknown heuristic '{hname}'")
-        if not heuristics:
-            heuristics = None
+                heur_names.append(h)
     elif "heuristic" in config:
-        # Fall back to a single heuristic if only one is provided.
-        hname = config.get("heuristic")
-        hf = select_heuristic(hname)
-        if hf is not None:
-            heuristics = [hf]
-    
-    # Load level
+        single = config["heuristic"]
+        hf = select_heuristic(single)
+        if hf:
+            heuristics.append(hf)
+            heur_names.append(single)
+
+    # Load level => returns (map_data, initial_state)
     level_data, initial_state = load_sokoban_map(level_file)
+    # Suppose level_data is a dict with "width", "height", "walls", "goals", etc.
 
-    # Select search algorithm
-    algorithm = select_algorithm(algorithm_name)
+    # Compute window size: map width & height + STATS_BAR_HEIGHT
+    tile_size = 40
+    map_pixel_width = level_data.width * tile_size
+    map_pixel_height = level_data.height * tile_size
+    window_width = map_pixel_width
+    window_height = map_pixel_height + STATS_BAR_HEIGHT
+
+    screen = pygame.display.set_mode((window_width, window_height))
+    pygame.display.set_caption("Sokoban Solver (Dynamic)")
+
+    # Load images
+    wall_img = pygame.image.load("assets/wall.png").convert_alpha()
+    wall_img = pygame.transform.scale(wall_img, (tile_size, tile_size))
+    box_img = pygame.image.load("assets/box.png").convert_alpha()
+    box_img = pygame.transform.scale(box_img, (tile_size, tile_size))
+    goal_img = pygame.image.load("assets/goal.png").convert_alpha()
+    goal_img = pygame.transform.scale(goal_img, (tile_size, tile_size))
+    player_img = pygame.image.load("assets/player.png").convert_alpha()
+    player_img = pygame.transform.scale(player_img, (tile_size, tile_size))
+
+    images = {
+        "wall": wall_img,
+        "box": box_img,
+        "goal": goal_img,
+        "player": player_img
+    }
+
+    # Select algorithm
+    algorithm = select_algorithm(algo_name)
     if not algorithm:
-        print(f"Error: Unknown algorithm '{algorithm_name}'")
-        return
+        print(f"Unknown algorithm '{algo_name}'")
+        pygame.quit()
+        sys.exit()
 
-    # Run selected algorithm
+    # Run the algorithm
     if heuristics:
         solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics)
     else:
@@ -126,31 +169,42 @@ def run_game(config_path="config.json"):
 
     if solution is None:
         print("No solution found!")
-        return
+        pygame.quit()
+        sys.exit()
 
     print(f"Solution found in {len(solution)} steps: {solution}")
 
-    # Game loop visualization
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("Arial", 20)
+
+    moves = 0
+    pushes = 0
     current_state = initial_state
-    running = True
     step = 0
+    running = True
 
     while running:
-        clock.tick(FPS)  
+        clock.tick(FPS)
 
-        # Event handling 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         if step < len(solution):
             action = solution[step]
-            current_state = apply_move(current_state, action, level_data)
-            draw_level(screen, current_state, level_data, wall_img, box_img, goal_img, player_img)
-            pygame.time.delay(500)  # Delay for visualization
+            # Check if push
+            old_boxes = current_state.box_positions
+            new_state = apply_move(current_state, action, level_data)
+            if new_state.box_positions != old_boxes:
+                pushes += 1
+            moves += 1
+
+            current_state = new_state
+            draw_level(screen, current_state, level_data, images, tile_size, font, moves, pushes, algo_name, heur_names)
+            pygame.time.delay(500)
             step += 1
         else:
-            pygame.time.delay(2000)  # Pause at the end
+            pygame.time.delay(2000)
             running = False
 
     pygame.quit()
@@ -158,8 +212,8 @@ def run_game(config_path="config.json"):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Must include config json file: python main.py <config_file>")
+        print("Usage: python main.py <config_file>")
         sys.exit(1)
 
-    config_path = sys.argv[1]  
+    config_path = sys.argv[1]
     run_game(config_path)
