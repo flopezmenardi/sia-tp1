@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-def hungarian_player_heuristic(state, level_data):
+def hungarian_heuristic(state, level_data):
     """
     Heurística compuesta para Sokoban:
       - Calcula el costo mínimo (suma de distancias Manhattan) para asignar 

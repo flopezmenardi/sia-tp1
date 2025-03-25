@@ -1,5 +1,5 @@
 {
     "level": 1,
     "algorithm": "greedy",
-    "heuristic": "manhattan"
+    "heuristic": "hungarian"
 }

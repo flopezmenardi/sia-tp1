@@ -9,6 +9,8 @@ from loaders.map_loader import load_sokoban_map
 from states.level_data import LevelData
 from states.sokoban_state import State, apply_move, get_possible_moves
 from heuristics.manhattan import manhattan_heuristic
+from heuristics.deadlock import deadlock_heuristic
+from heuristics.hungarian import hungarian_heuristic
 
 # Pygame setup
 TILE_SIZE = 40  
@@ -36,9 +38,9 @@ def select_algorithm(name):
 # Select heuristic function dynamically (if needed)
 def select_heuristic(name):
     heuristics = {
-        "manhattan": manhattan_heuristic
-        # ,
-        # "deadlocks": deadlocks_heuristic
+        "manhattan": manhattan_heuristic,
+        "deadlocks": deadlock_heuristic,
+        "hungarian": hungarian_heuristic
     }
     return heuristics.get(name.lower())
 
