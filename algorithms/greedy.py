@@ -37,12 +37,16 @@ def greedy_search(initial_state, goal_test, actions_fn, level_data, heuristics_f
     heapq.heappush(frontier, (root_node.composed_heuristic, counter, root_node))
     counter += 1
     visited = set([root_node.state])
+
+    expanded_nodes = 0
+    max_frontier_size = 1
     
     while frontier:
         _, _, current_node = heapq.heappop(frontier)
+        expanded_nodes += 1
         
         if goal_test(current_node.state):
-            return reconstruct_path(current_node)
+            return reconstruct_path(current_node), expanded_nodes, max_frontier_size
         
         # Expand children using actions_fn(state, level_data)
         for action, next_state in actions_fn(current_node.state, level_data):
@@ -52,5 +56,6 @@ def greedy_search(initial_state, goal_test, actions_fn, level_data, heuristics_f
                 child_node = GreedyNode(state=next_state, parent=current_node, action=action, heuristics=h_values)
                 heapq.heappush(frontier, (child_node.composed_heuristic, counter, child_node))
                 counter += 1
+        max_frontier_size = max(max_frontier_size, len(frontier))
                 
-    return None
+    return None, expanded_nodes, max_frontier_size

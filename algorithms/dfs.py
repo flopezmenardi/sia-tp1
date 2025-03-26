@@ -24,13 +24,14 @@ def dfs_search(initial_state, goal_test, actions_fn, level_data):
     stack = [root_node]
     visited = set([root_node.state])
 
+    expanded_nodes = 0  # Tracks how many nodes we expand
+    max_frontier_size = 1  # Tracks peak size of the frontier
+
     while stack:
         current_node = stack.pop()
-        # If we have a limit, skip expanding if we reached max_depth
-        # if max_depth is not None and current_node.depth >= max_depth:
-        #    continue
+        expanded_nodes += 1  
         
-        for action, next_state in actions_fn(current_node.state, level_data):
+        for action, next_state in reversed(actions_fn(current_node.state, level_data)):
             if next_state not in visited:
                 visited.add(next_state)
                 child_node = DFSNode(
@@ -40,7 +41,8 @@ def dfs_search(initial_state, goal_test, actions_fn, level_data):
                     depth=current_node.depth + 1
                 )
                 if goal_test(child_node.state):
-                    return reconstruct_path(child_node)
+                    return reconstruct_path(child_node), expanded_nodes, len(stack)
                 stack.append(child_node)
+                max_frontier_size = max(max_frontier_size, len(stack))
                 
     return None

@@ -42,17 +42,17 @@ def a_star_search(initial_state, goal_test, actions_fn, level_data, heuristics_f
     heapq.heappush(frontier, (root_node.f, root_node))
     
     visited = dict()  
-    # Instead of a set, sometimes we keep a dict mapping:
-    #   visited[state] = best_cost_so_far
-    # So we can do "if next_state not in visited or new_g < visited[next_state]" checks
-
     visited[root_node.state] = root_node.cost_so_far
+
+    expanded_nodes = 0
+    max_frontier_size = 1
 
     while frontier:
         _, current_node = heapq.heappop(frontier)
+        expanded_nodes += 1
 
         if goal_test(current_node.state):
-            return reconstruct_path(current_node)
+            return reconstruct_path(current_node), expanded_nodes, max_frontier_size
 
         #expand children
         for action, next_state in actions_fn(current_node.state, level_data):
@@ -69,5 +69,6 @@ def a_star_search(initial_state, goal_test, actions_fn, level_data, heuristics_f
                     heuristics=h_values
                 )
                 heapq.heappush(frontier, (child_node.f, child_node))
+        max_frontier_size = max(max_frontier_size, len(frontier))
 
-    return None
+    return None, expanded_nodes, max_frontier_size

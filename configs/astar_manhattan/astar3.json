@@ -1,0 +1,5 @@
+{
+    "algorithm": "astar",
+    "heuristic": "deadlock",
+    "level": 3
+}

@@ -12,13 +12,17 @@ def bfs_search(initial_state, goal_test, actions_fn, level_data):
     root_node = BFSNode(state=initial_state, parent=None, action=None, depth=0)
     
     if goal_test(root_node.state):
-        return reconstruct_path(root_node)
+        return reconstruct_path(root_node), 1, 1 #immediate success
 
     frontier = deque([root_node])   # FIFO queue
     visited = set([root_node.state])  # track visited states to avoid repeats
 
+    expanded_nodes = 0  # Tracks how many nodes we expand
+    max_frontier_size = 1  # Tracks peak size of the frontier
+
     while frontier:
         current_node = frontier.popleft()
+        expanded_nodes += 1  
 
         # Expand children
         for action, next_state in actions_fn(current_node.state, level_data):
@@ -31,9 +35,9 @@ def bfs_search(initial_state, goal_test, actions_fn, level_data):
                     depth=current_node.depth + 1
                 )
                 if goal_test(child_node.state):
-                    return reconstruct_path(child_node)
+                    return reconstruct_path(child_node), expanded_nodes, len(frontier)
                 frontier.append(child_node)
-
+                max_frontier_size = max(max_frontier_size, len(frontier))
     # No solution found
     return None
 

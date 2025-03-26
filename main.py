@@ -1,6 +1,7 @@
 import pygame
 import sys
 import json
+import time
 
 # Example placeholders for BFS, DFS, etc. 
 # (Replace with your actual imports if needed)
@@ -125,7 +126,6 @@ def run_game(config_path):
 
     # Load level => returns (map_data, initial_state)
     level_data, initial_state = load_sokoban_map(level_file)
-    # Suppose level_data is a dict with "width", "height", "walls", "goals", etc.
 
     # Compute window size: map width & height + STATS_BAR_HEIGHT
     tile_size = 40
@@ -161,18 +161,33 @@ def run_game(config_path):
         pygame.quit()
         sys.exit()
 
+    # Track execution time
+    start_time = 0
+    end_time = 0
+
     # Run the algorithm
     if heuristics:
-        solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics)
+        start_time = time.time()
+        solution, expanded_nodes, frontier_size = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics)
+        end_time = time.time()
     else:
-        solution = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data)
+        start_time = time.time()
+        solution, expanded_nodes, frontier_size = algorithm(initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data)
+        end_time = time.time()
+    
+    processing_time = end_time - start_time
 
     if solution is None:
-        print("No solution found!")
+        print("❌ No solution found!")
         pygame.quit()
         sys.exit()
-
-    print(f"Solution found in {len(solution)} steps: {solution}")
+    else:
+        print("✅ Solution found!")
+        print(f"🔹 Cost of Solution: {len(solution)} steps")
+        print(f"🔹 Nodes Expanded: {expanded_nodes}")
+        print(f"🔹 Nodes in Frontier: {frontier_size}")
+        print(f"🔹 Processing Time: {processing_time:.4f} seconds")
+        print(f"🔹 Solution Path: {solution}")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 20)

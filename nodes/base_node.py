@@ -11,6 +11,3 @@ class Node:
         self.parent = parent            # Nodo padre
         self.action = action            # Acción que llevó a este nodo
         self.cost_so_far = cost_so_far  # g(n)
-        # self.depth = depth              # Profundidad en el árbol de búsqueda
-        # self.heuristic = heuristic      # h(n), si hace falta
-        # self.f = self.cost_so_far + self.heuristic  # f(n) = g(n) + h(n) (solo si usas A*)
