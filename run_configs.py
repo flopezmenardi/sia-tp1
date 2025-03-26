@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from main import run_game
+from main_analysis import run_game
 
 # Folder containing configuration files
 config_folder = "configs/analysis"
