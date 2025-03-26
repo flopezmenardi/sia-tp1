@@ -2,8 +2,10 @@ def manhattan_heuristic(state, level_data):
     """
     A* heuristic function for Sokoban
 
-    h(n) = Sum of (each box's distance to its closest goal)
-         + Distance from player to the nearest box.
+    h(n) = [ Sum of (each box's distance to its closest goal)
+         + Distance from player to the nearest box ] / 2
+    
+    We must divide by 2 to avoid overestimating the cost
     
     :param state: The current Sokoban state (player position, box positions)
     :param level_data: Static level data (walls, goals, precomputed distances)
@@ -26,4 +28,4 @@ def manhattan_heuristic(state, level_data):
         player_to_box_distance = 0  #case no boxes left
 
     #return the total heuristic sum
-    return total_box_distance + player_to_box_distance
+    return (total_box_distance + player_to_box_distance) / 2

@@ -1,0 +1,11 @@
+{
+    "level": 23,
+    "algorithm": "astar",
+    "heuristics": [
+        ["manhattan"],
+        ["hungarian"],
+        ["deadlock"],
+        ["manhattan", "deadlock"],
+        ["hungarian", "deadlock"]
+    ]
+}

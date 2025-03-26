@@ -18,7 +18,7 @@ from heuristics.hungarian import hungarian_heuristic
 
 # Height (in pixels) reserved at the top for stats
 STATS_BAR_HEIGHT = 60  
-FPS = 60
+FPS = 15
 WHITE = (255, 255, 255)
 BROWN = (164, 116, 73)
 
