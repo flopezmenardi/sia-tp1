@@ -1,4 +1,12 @@
-def dfs_search(initial_state, goal_test, actions_fn, max_depth=None):
+def reconstruct_path(node):
+    path = []
+    while node.parent is not None:
+        path.append(node.action)
+        node = node.parent
+    path.reverse()  # reverse to get path from initial state to goal
+    return path
+
+def dfs_search(initial_state, goal_test, actions_fn, level_data):
     """
     :param initial_state: starting state
     :param goal_test: function to check if a state is goal
@@ -19,10 +27,10 @@ def dfs_search(initial_state, goal_test, actions_fn, max_depth=None):
     while stack:
         current_node = stack.pop()
         # If we have a limit, skip expanding if we reached max_depth
-        if max_depth is not None and current_node.depth >= max_depth:
-            continue
+        # if max_depth is not None and current_node.depth >= max_depth:
+        #    continue
         
-        for action, next_state in actions_fn(current_node.state):
+        for action, next_state in actions_fn(current_node.state, level_data):
             if next_state not in visited:
                 visited.add(next_state)
                 child_node = DFSNode(

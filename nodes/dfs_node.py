@@ -1,8 +1,8 @@
 # nodes/dfs_node.py
 
-from .base_node import BaseNode
+from .base_node import Node
 
-class DFSNode(BaseNode):
+class DFSNode(Node):
     """
     DFS can also track depth to limit recursion (Depth-Limited Search)
     or for iterative deepening.

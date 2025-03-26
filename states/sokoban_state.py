@@ -7,7 +7,8 @@ class State:
         They remain in a global or external structure.
         """
         self.player_pos = player_pos  # (x, y)
-        self.box_positions = frozenset(box_positions)  # Must be immutable for hashing
+        # Convert box_positions to a sorted tuple to ensure a canonical order.
+        self.box_positions = tuple(sorted(box_positions))
 
     def is_goal(self, level_data):
         """
@@ -15,8 +16,8 @@ class State:
         referencing the external 'level_data' for the goals.
         """
         # if we want EXACT match:
-        return self.box_positions == level_data.goals
-        # if we want a subset logic do: self.box_positions.issubset(level_data.goals)
+        return set(self.box_positions) == level_data.goals
+        # if we want a subset logic do: set(self.box_positions).issubset(level_data.goals)
 
     def __eq__(self, other):
         """Two states are equal if they share player/boxes."""
@@ -28,7 +29,8 @@ class State:
         return hash((self.player_pos, self.box_positions))
 
     def __repr__(self):
-        return f"Player: {self.player_pos}, Boxes: {sorted(self.box_positions)}"
+        return f"Player: {self.player_pos}, Boxes: {self.box_positions}"
+
 
 def apply_move(state, action, level_data):
     """Applies an action and returns a new state."""
@@ -63,6 +65,7 @@ def apply_move(state, action, level_data):
         new_box_positions.add((new_bx, new_by))
 
     return State((new_px, new_py), new_box_positions)
+
 
 def get_possible_moves(state, level_data):
     """
@@ -100,7 +103,7 @@ def get_possible_moves(state, level_data):
             new_box_positions.remove((new_px, new_py))
             new_box_positions.add((new_bx, new_by))
 
-        # If valid, add to possible moves
+        # Create new state (which will automatically sort the box positions)
         new_state = State((new_px, new_py), new_box_positions)
         possible_moves.append((action, new_state))
 
