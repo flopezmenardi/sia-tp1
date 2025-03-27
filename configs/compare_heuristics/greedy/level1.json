@@ -1,0 +1,10 @@
+{
+    "level": 1,
+    "algorithm": "greedy",
+    "heuristics": [
+        ["manhattan"],
+        ["hungarian"],
+        ["manhattan", "deadlock"],
+        ["hungarian", "deadlock"]
+    ]
+}
