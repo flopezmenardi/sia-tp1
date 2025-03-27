@@ -1,28 +1,30 @@
-import os
+import json
 import pandas as pd
 import matplotlib.pyplot as plt
 from main_analysis import run_game
 
-# Folder containing configuration files
-config_folder = "configs/analysis"
+# Path to the JSON file containing configurations
+config_file = "configs/analysis/configs.json"
 results = []
 
+# Load configurations from the JSON file
+with open(config_file, "r") as f:
+    configs = json.load(f)
+
 # Run all configurations and collect results
-for config_file in os.listdir(config_folder):
-    if config_file.endswith(".json"):
-        config_path = os.path.join(config_folder, config_file)
-        print(f"Running with config: {config_file}")
-        solution, expanded_nodes, frontier_size, processing_time = run_game(config_path, simulate=False)
-        algo_name = config_file.split("_")[0]  # Extract algorithm name from file name
-        condition = "_".join(config_file.split("_")[1:]).replace(".json", "")  # Extract condition
-        results.append({
-            "Algorithm": algo_name,
-            "Condition": condition,
-            "Solution Length": len(solution) if solution else None,
-            "Expanded Nodes": expanded_nodes,
-            "Frontier Size": frontier_size,
-            "Processing Time": processing_time
-        })
+for config in configs:
+    print(f"Running with config: {config}")
+    solution, expanded_nodes, frontier_size, processing_time = run_game(config, simulate=False)
+    algo_name = config["algorithm"]
+    condition = f"Level {config['level']}"  # Use level as the condition
+    results.append({
+        "Algorithm": algo_name,
+        "Condition": condition,
+        "Solution Length": len(solution) if solution else None,
+        "Expanded Nodes": expanded_nodes,
+        "Frontier Size": frontier_size,
+        "Processing Time": processing_time
+    })
 
 # Convert results to a DataFrame for easier analysis
 df = pd.DataFrame(results)

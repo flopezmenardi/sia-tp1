@@ -1,0 +1,17 @@
+[
+    {
+        "level": 1,
+        "algorithm": "astar",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+    {
+        "level": 2,
+        "algorithm": "bfs",
+        "heuristics": []
+    },
+    {
+        "level": 3,
+        "algorithm": "dfs",
+        "heuristics": []
+    }
+]
