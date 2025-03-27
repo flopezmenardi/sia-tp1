@@ -15,7 +15,7 @@ para instalar las dependencias necesarias en el ambiente virtual
 ## Ejecución
 
 ### Main
-Al correr el archivo main, se visualizará la resolución hayada por dicho algoritmo utilizando Pygame, y se imprimirán métricas como nodos expandidos en terminal.
+Al correr el archivo main, se visualizará la resolución hallada por dicho algoritmo utilizando Pygame, y se imprimirán métricas como nodos expandidos en terminal.
 ```
 pipenv run python main.py configs/tests/[config_file]
 ```
