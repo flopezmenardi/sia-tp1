@@ -1,5 +1,5 @@
 {
-    "level": 33,
+    "levels": [1, 23, 131, 133],
     "algorithm": "greedy",
     "heuristics": ["manhattan", "deadlock"]
 }

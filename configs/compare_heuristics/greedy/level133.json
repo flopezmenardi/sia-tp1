@@ -1,5 +1,5 @@
 {
-    "level": 33,
+    "level": 133,
     "algorithm": "greedy",
     "heuristics": [
         ["manhattan"],
