@@ -4,7 +4,9 @@
     "heuristics": [
         ["manhattan"],
         ["hungarian"],
+        ["euclidean"],
         ["manhattan", "deadlock"],
-        ["hungarian", "deadlock"]
+        ["hungarian", "deadlock"],
+        ["euclidean", "deadlock"]
     ]
 }

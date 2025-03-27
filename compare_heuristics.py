@@ -14,6 +14,7 @@ from algorithms.astar import a_star_search
 from heuristics.manhattan import manhattan_heuristic
 from heuristics.deadlock import deadlock_heuristic
 from heuristics.hungarian import hungarian_heuristic
+from heuristics.euclidean import euclidean_heuristic
 
 def select_algorithm(name):
     return {
@@ -27,7 +28,8 @@ def select_heuristic(name):
     return {
         "manhattan": manhattan_heuristic,
         "deadlock": deadlock_heuristic,
-        "hungarian": hungarian_heuristic
+        "hungarian": hungarian_heuristic,
+        "euclidean": euclidean_heuristic
     }.get(name.lower())
 
 def run_trial(algorithm, level_data, initial_state, heuristics):

@@ -15,6 +15,7 @@ from states.sokoban_state import apply_move, get_possible_moves
 from heuristics.manhattan import manhattan_heuristic
 from heuristics.deadlock import deadlock_heuristic
 from heuristics.hungarian import hungarian_heuristic
+from heuristics.euclidean import euclidean_heuristic
 
 # Height (in pixels) reserved at the top for stats
 STATS_BAR_HEIGHT = 60  
@@ -35,7 +36,8 @@ def select_heuristic(name):
     heuristics = {
         "manhattan": manhattan_heuristic,
         "deadlock": deadlock_heuristic,
-        "hungarian": hungarian_heuristic
+        "hungarian": hungarian_heuristic,
+        "euclidean": euclidean_heuristic
     }
     return heuristics.get(name.lower())
 
