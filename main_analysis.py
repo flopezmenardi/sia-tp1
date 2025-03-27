@@ -132,11 +132,11 @@ def run_game(config, simulate=False):
 
     # Track execution time
     start_time = time.time()
-    if heuristic_functions:
+    if algo_name in ["astar", "greedy"]:  # Only pass heuristics for A* or Greedy
         solution, expanded_nodes, frontier_size = algorithm(
             initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristic_functions
         )
-    else:
+    else:  # For BFS, DFS, etc., do not pass heuristics
         solution, expanded_nodes, frontier_size = algorithm(
             initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data
         )

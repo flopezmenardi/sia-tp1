@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
+from itertools import product
 from main_analysis import run_game
 
 # Path to the JSON file containing configurations
@@ -9,17 +10,30 @@ results = []
 
 # Load configurations from the JSON file
 with open(config_file, "r") as f:
-    configs = json.load(f)
+    config_data = json.load(f)
+
+# Extract levels, algorithms, and heuristics
+levels = config_data["levels"]
+algorithms = config_data["algorithms"]
+heuristics_list = config_data["heuristics"]
+
+# Generate all permutations of levels, algorithms, and heuristics
+configurations = list(product(levels, algorithms, heuristics_list))
 
 # Run all configurations and collect results
-for config in configs:
+for level, algorithm, heuristics in configurations:
+    config = {
+        "level": level,
+        "algorithm": algorithm,
+        "heuristics": heuristics
+    }
     print(f"Running with config: {config}")
     solution, expanded_nodes, frontier_size, processing_time = run_game(config, simulate=False)
-    algo_name = config["algorithm"]
-    condition = f"Level {config['level']}"  # Use level as the condition
+    condition = f"Level {level}"  # Use level as the condition
     results.append({
-        "Algorithm": algo_name,
+        "Algorithm": algorithm,
         "Condition": condition,
+        "Heuristics": ", ".join(heuristics) if heuristics else "None",
         "Solution Length": len(solution) if solution else None,
         "Expanded Nodes": expanded_nodes,
         "Frontier Size": frontier_size,
@@ -34,10 +48,10 @@ df.to_csv("results.csv", index=False)
 
 # Generate graphs for comparisons
 def generate_graph(metric, title, ylabel):
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 8))
     for algo in df["Algorithm"].unique():
         subset = df[df["Algorithm"] == algo]
-        plt.plot(subset["Condition"], subset[metric], marker="o", label=algo)
+        plt.plot(subset["Condition"], subset[metric], marker="o", label=f"{algo} ({subset['Heuristics'].iloc[0]})")
     plt.title(title)
     plt.xlabel("Conditions")
     plt.ylabel(ylabel)
