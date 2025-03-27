@@ -16,6 +16,8 @@ from heuristics.deadlock import deadlock_heuristic
 from heuristics.hungarian import hungarian_heuristic
 from heuristics.euclidean import euclidean_heuristic
 
+NUM_TRIALS = 100  # Number of runs for execution time averaging
+
 def select_algorithm(name):
     return {
         "bfs": bfs_search,
@@ -52,15 +54,14 @@ def run_trial(algorithm, level_data, initial_state, heuristics):
     end_time = time.time()
     exec_time = end_time - start_time
 
-    # Simulate the solution to count moves and pushes.
+    # Count moves and pushes
     moves = 0
     pushes = 0
     current_state = initial_state
     for action in solution:
         old_boxes = current_state.box_positions
         new_state = apply_move(current_state, action, level_data)
-        # If the box positions have changed, it was a push.
-        if new_state.box_positions != old_boxes:
+        if new_state.box_positions != old_boxes:  # If boxes changed, it's a push
             pushes += 1
         moves += 1
         current_state = new_state
@@ -84,23 +85,32 @@ def main(config_file):
 
     results = []
     for heuristics in heuristics_list:
-        # Build a list of heuristic functions and a display name.
         heuristic_funcs = [select_heuristic(h) for h in heuristics]
         heuristic_names = ", ".join(heuristics)
 
-        # Run a single trial for this heuristic configuration.
-        solution, exec_time, expanded_nodes, frontier_size, moves, pushes = run_trial(
+        # Run NUM_TRIALS and calculate mean execution time with error bars
+        execution_times = []
+        for _ in range(NUM_TRIALS):
+            _, exec_time, _, _, _, _ = run_trial(algorithm, level_data, initial_state, heuristic_funcs)
+            execution_times.append(exec_time)
+
+        mean_exec_time = np.mean(execution_times)
+        std_exec_time = np.std(execution_times)  # Standard deviation for error bars
+
+        # Run once to get static values (solution cost, expanded nodes, etc.)
+        solution, _, expanded_nodes, frontier_size, moves, pushes = run_trial(
             algorithm, level_data, initial_state, heuristic_funcs
         )
 
         results.append({
             "heuristic": heuristic_names,
-            "exec_time": exec_time,
+            "exec_time_mean": mean_exec_time,
+            "exec_time_std": std_exec_time,
             "expanded_nodes": expanded_nodes,
             "frontier_size": frontier_size,
             "moves": moves,
             "pushes": pushes,
-            "solution_length": len(solution)
+            "solution_length": len(solution)  # Number of steps to solve
         })
 
     df = pd.DataFrame(results)
@@ -109,9 +119,9 @@ def main(config_file):
     print("\n=== Execution Summary ===")
     print(df.to_string(index=False))
 
-    # Generate Execution Time Chart
+    # Generate Execution Time Chart with Error Bars
     plt.figure(figsize=(10, 6))
-    plt.bar(df["heuristic"], df["exec_time"], color="skyblue")
+    plt.bar(df["heuristic"], df["exec_time_mean"], yerr=df["exec_time_std"], color="skyblue", capsize=5)
     plt.xlabel("Heuristic")
     plt.ylabel("Execution Time (s)")
     plt.title(f"Execution Time of {algorithm_name.upper()} with Different Heuristics (Level {level_number})")
@@ -131,8 +141,6 @@ def main(config_file):
     plt.title(f"Moves and Pushes for {algorithm_name.upper()} with Different Heuristics (Level {level_number})")
     plt.xticks(x + bar_width / 2, df["heuristic"], rotation=45)
     plt.legend()
-    max_val = max(df["moves"].max(), df["pushes"].max())
-    plt.ylim(0, max_val * 1.1)
     plt.tight_layout()
     plt.show()
     plt.close()

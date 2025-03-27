@@ -1,5 +1,5 @@
 {
-    "level": 23,
+    "level": 43,
     "algorithm": "astar",
     "heuristics": [
         ["euclidean"],

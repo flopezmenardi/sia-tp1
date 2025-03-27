@@ -1,0 +1,5 @@
+{
+    "level": 1,
+    "algorithms": ["bfs", "dfs"],
+    "heuristics": []
+}

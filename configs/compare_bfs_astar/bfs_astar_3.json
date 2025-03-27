@@ -1,0 +1,5 @@
+{
+    "level": 39,
+    "algorithms": ["astar", "bfs"],
+    "heuristics": ["manhattan", "deadlock"]
+}
