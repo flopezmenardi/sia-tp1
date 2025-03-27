@@ -98,33 +98,27 @@ def draw_level(screen, state, level_data, images, tile_size, font, moves, pushes
 
     pygame.display.update()
 
-def run_game(config_path, simulate=True):
-    pygame.init()
-    pygame.font.init()
-    config = load_config(config_path)
+def run_game(config, simulate=False):
+    """
+    Runs the Sokoban solver based on the provided configuration.
 
-    # Basic config
-    level_number = config.get("level", 1)
+    Args:
+        config (dict): Configuration dictionary with keys:
+            - level (int): The level number to load.
+            - algorithm (str): The algorithm to use (e.g., "astar", "bfs").
+            - heuristics (list of str): List of heuristic names (optional).
+        simulate (bool): Whether to run the graphical simulation.
+
+    Returns:
+        tuple: (solution, expanded_nodes, frontier_size, processing_time)
+    """
+    # Extract configuration values
+    level_number = config["level"]
+    algo_name = config["algorithm"]
+    heuristics = config.get("heuristics", [])  # Default to an empty list if not provided
+
+    # Load the level file
     level_file = f"maps/level{level_number}.txt"
-    algo_name = config.get("algorithm", "bfs")
-
-    # Determine heuristics
-    heuristics = []
-    heur_names = []
-    if "heuristics" in config:
-        for h in config["heuristics"]:
-            hf = select_heuristic(h)
-            if hf:
-                heuristics.append(hf)
-                heur_names.append(h)
-    elif "heuristic" in config:
-        single = config["heuristic"]
-        hf = select_heuristic(single)
-        if hf:
-            heuristics.append(hf)
-            heur_names.append(single)
-
-    # Load level => returns (map_data, initial_state)
     level_data, initial_state = load_sokoban_map(level_file)
 
     # Select algorithm
@@ -133,13 +127,16 @@ def run_game(config_path, simulate=True):
         print(f"Unknown algorithm '{algo_name}'")
         return None, None, None, None
 
+    # Prepare heuristics
+    heuristic_functions = [select_heuristic(h) for h in heuristics if select_heuristic(h)]
+
     # Track execution time
     start_time = time.time()
-    if algo_name in ["astar", "greedy"]:  # Only pass heuristics for A* or Greedy
+    if heuristic_functions:
         solution, expanded_nodes, frontier_size = algorithm(
-            initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristics
+            initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data, heuristic_functions
         )
-    else:  # For BFS, DFS, etc., do not pass heuristics
+    else:
         solution, expanded_nodes, frontier_size = algorithm(
             initial_state, lambda s: s.is_goal(level_data), get_possible_moves, level_data
         )
@@ -157,11 +154,14 @@ def run_game(config_path, simulate=True):
         print(f"🔹 Processing Time: {processing_time:.4f} seconds")
         print(f"🔹 Solution Path: {solution}")
 
-    # Skip simulation if simulate=False
+    # Skip graphical simulation if simulate=False
     if not simulate:
         return solution, expanded_nodes, frontier_size, processing_time
 
-    # Graphical simulation
+    # Graphical simulation setup
+    pygame.init()
+    pygame.font.init()
+
     tile_size = 40
     map_pixel_width = level_data.width * tile_size
     map_pixel_height = level_data.height * tile_size
@@ -214,7 +214,7 @@ def run_game(config_path, simulate=True):
             moves += 1
 
             current_state = new_state
-            draw_level(screen, current_state, level_data, images, tile_size, font, moves, pushes, algo_name, heur_names)
+            draw_level(screen, current_state, level_data, images, tile_size, font, moves, pushes, algo_name, heuristics)
             pygame.time.delay(500)
             step += 1
         else:
