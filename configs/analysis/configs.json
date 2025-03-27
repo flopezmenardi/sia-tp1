@@ -1,17 +1,92 @@
 [
     {
         "level": 1,
+        "algorithm": "bfs"
+    },
+    {
+        "level": 1,
+        "algorithm": "dfs"
+    },
+    {
+        "level": 1,
+        "algorithm": "astar",
+        "heuristics": ["manhattan", "deadlock"]
+
+    },
+    {
+        "level": 1,
+        "algorithm": "astar",
+        "heuristics": ["hungarian", "deadlock"]
+
+    },
+    {
+        "level": 1,
+        "algorithm": "greedy",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+    {
+        "level": 1,
+        "algorithm": "greedy",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 23,
         "algorithm": "astar",
         "heuristics": ["manhattan", "deadlock"]
     },
     {
-        "level": 2,
-        "algorithm": "bfs",
-        "heuristics": []
+        "level": 23,
+        "algorithm": "astar",
+        "heuristics": ["hungarian", "deadlock"]
     },
     {
-        "level": 3,
-        "algorithm": "dfs",
-        "heuristics": []
+        "level": 23,
+        "algorithm": "greedy",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+    {
+        "level": 23,
+        "algorithm": "greedy",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 33,
+        "algorithm": "greedy",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 33,
+        "algorithm": "greedy",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+    {
+        "level": 33,
+        "algorithm": "astar",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 33,
+        "algorithm": "astar",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+    {
+        "level": 39,
+        "algorithm": "astar",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 39,
+        "algorithm": "astar",
+        "heuristics": ["manhattan", "deadlock"]
+    },
+        {
+        "level": 39,
+        "algorithm": "greedy",
+        "heuristics": ["hungarian", "deadlock"]
+    },
+    {
+        "level": 39,
+        "algorithm": "greedy",
+        "heuristics": ["manhattan", "deadlock"]
     }
 ]
