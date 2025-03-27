@@ -1,0 +1,5 @@
+{
+    "level": 23,
+    "algorithms": ["greedy", "astar"],
+    "heuristics": ["manhattan", "deadlock"]
+}
