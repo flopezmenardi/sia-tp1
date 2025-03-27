@@ -3,13 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from itertools import product
 from main_analysis import run_game
+import argparse
 
-# Path to the JSON file containing configurations
-config_file = "configs/analysis/configs.json"
-results = []
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Run Sokoban configurations and generate comparisons.")
+parser.add_argument("config_file", type=str, help="Path to the JSON file containing configurations.")
+args = parser.parse_args()
 
 # Load configurations from the JSON file
-with open(config_file, "r") as f:
+with open(args.config_file, "r") as f:
     config_data = json.load(f)
 
 # Extract levels, algorithms, and heuristics
@@ -21,6 +23,7 @@ heuristics_list = config_data["heuristics"]
 configurations = list(product(levels, algorithms, heuristics_list))
 
 # Run all configurations and collect results
+results = []
 for level, algorithm, heuristics in configurations:
     config = {
         "level": level,
@@ -49,15 +52,37 @@ df.to_csv("results.csv", index=False)
 # Generate graphs for comparisons
 def generate_graph(metric, title, ylabel):
     plt.figure(figsize=(12, 8))
-    for algo in df["Algorithm"].unique():
+    algorithms = df["Algorithm"].unique()
+    x_labels = df["Condition"].unique()
+    x = range(len(x_labels))  # X-axis positions for the bars
+
+    # Bar width and offsets for each algorithm
+    bar_width = 0.2
+    offsets = [(i - len(algorithms) / 2) * bar_width for i in range(len(algorithms))]
+
+    for i, algo in enumerate(algorithms):
         subset = df[df["Algorithm"] == algo]
-        plt.plot(subset["Condition"], subset[metric], marker="o", label=f"{algo} ({subset['Heuristics'].iloc[0]})")
+        y_values = [subset[subset["Condition"] == condition][metric].mean() for condition in x_labels]
+
+        # Include heuristics in the label only for informed searches
+        if algo in ["astar", "greedy"]:
+            label = f"{algo} ({subset['Heuristics'].iloc[0]})"
+        else:
+            label = algo
+
+        plt.bar(
+            [pos + offsets[i] for pos in x],  # Adjust bar positions for each algorithm
+            y_values,
+            bar_width,
+            label=label
+        )
+
     plt.title(title)
     plt.xlabel("Conditions")
     plt.ylabel(ylabel)
+    plt.xticks(x, x_labels, rotation=45)
     plt.legend()
-    plt.grid()
-    plt.xticks(rotation=45)
+    plt.grid(axis="y")
     plt.tight_layout()
     plt.savefig(f"{metric.replace(' ', '_').lower()}_comparison.png")
     plt.show()

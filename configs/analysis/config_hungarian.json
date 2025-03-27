@@ -1,0 +1,5 @@
+{
+    "levels": [1, 23, 39],
+    "algorithms": ["bfs", "dfs", "astar", "greedy"],
+    "heuristics": [["hungarian", "deadlock"]]
+}
